@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ko">
+<head>
+    <title>Blog me | sdjo web site</title>
+    <link rel="stylesheet" href="{% static 'blog/bootstrap/bootstrap.min.css' %}" type="text/css">
+    <script src="https://kit.fontawesome.com/77d81e5d17.js" crossorigin="anonymous"></script>
+    <link href="{% static 'single_pages/css/landing.css' %}" rel="stylesheet" type="text/css">
+</head>
+<body>
+{% include 'blog/navbar.html' %}
+
+<section>
+    <div class="container">
+        <div class="row justify-content-between">
+            <div class="col-lg-6 text-warning">
+<!--                <h1 class="shadow-none mt-5">Welcome~! Have a good day!</h1>-->
+<!--                <h2>We are 22shop</h2>-->
+<!--                <h3>수정 중 입니다.</h3>-->
+            </div>
+            <div class="col-lg-5">
+                    <h2 class="text-light mt-5">Notice - Recent posts</h2>
+<!--                    <h2 class="text-light mt-5">Blog - Recent posts</h2>-->
+                    {% for post in recent_posts %}
+                    <div class="card mt-1">
+                        <div class="card-body">
+                            <h6><a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark">{{ post.title }}</a></h6>
+                            <span class="badge badge-pill badge-light float-right">
+                                {{ post.author.username }}
+                                &nbsp;&nbsp;
+                                {{ post.created_at }}
+                            </span>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div>
+        </div>
+    </div>
+</section>
+<script>
+    function searchPost(){
+        let searchValue = document.getElementById('search-input').value.trim();
+        if (searchValue.length > 1){
+            location.href="/blog/search/"+ searchValue + "/";
+        }
+        else{
+            alert('검색어(' + searchValue + ')가 너무 짧습니다.');
+        }
+    };
+
+    document.getElementById('search-input').addEventListener('keyup', function(event){
+        if(event.key == 'Enter'){
+            searchPost();
+        }
+    })
+</script>
+<div class="fixed-bottom">
+    {% include 'blog/footer.html' %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

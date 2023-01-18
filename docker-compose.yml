@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/usr/src/app/_static
+      - media_volume:/usr/src/app/_media
+    ports:
+      - 80:80
+    depends_on:
+      - web
+  web:
+    build: .
+    command: gunicorn django_blog_sdjo.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/usr/src/app/_static
+      - media_volume:/usr/src/app/_media
+      - ./:/usr/src/app/
+    expose:
+      - 8000
+    env_file:
+      - ./.env.prod
+    depends_on:
+      - db
+
+#  db:
+#    build: ./mariaDB
+#    volumes:
+#      - mariadb_data:/var/lib/mysql
+#    ports:
+#      - 3307:3306
+#    environment:
+#      MARIADB_USER: sdjo
+#      MARIADB_PASSWORD: p@ssw0rd
+#      MARIADB_DATABASE: shops
+#      MARIADB_ROOT_PASSWORD: p@ssw0rd
+#  db:
+#    image: postgres:12.0-alpine
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data/
+#    ports:
+#      - 5432:5432
+#    env_file:
+#      - ./.env.prod.db
+
+volumes:
+#  postgres_data:
+  static_volume:
+  media_volume:

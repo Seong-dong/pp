@@ -1,0 +1,59 @@
+{% extends 'blog/base.html' %}
+
+{% block main_area %}
+
+
+<table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">TITLE</th>
+      <th scope="col">AUTHOR</th>
+      <th scope="col">DATE</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for board in board_list %}
+    <tr>
+      <th scope="row">{{ board.pk }}</th>
+      <td><a href="{{ board.get_absolute_url }}">{{ board.title }}</a></td>
+      <td>{{ board.author }}</td>
+      <td>{{ board.created_at }}</td>
+    </tr>
+  </tbody>
+  {% endfor %}
+</table>
+<hr/>
+
+{% if user.is_authenticated %}
+<a href="/board/create/" type="button" class="btn btn-secondary float-right">Write</a>
+{% else %}
+<a href="#" data-toggle="modal" data-target="#loginModal" type="button" class="btn btn-primary float-right">Disable</a>
+{% endif %}
+
+<!-- Pagination -->
+{% if is_paginated %}
+    <ul class="pagination justify-content-center mb-4">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Before</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#">Before</a>
+        </li>
+        {% endif %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <a class="page-link" href="#">Next</a>
+        </li>
+        {% endif %}
+
+    </ul>
+{% endif %}
+
+{% endblock %}

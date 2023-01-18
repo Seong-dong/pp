@@ -1,0 +1,115 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    # git에서 설정한 비공개 변수
+    - name: checkout source code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: "ap-northeast-2"
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    # - name: Set var
+    #   id: set-var
+    #   run: |
+    #     echo ::set-output name=ECR_REGISTRY::${{ steps.login-ecr.outputs.registry }}
+    #     echo ::set-output name=ECR_REPOSITORY::web
+    #     echo ::set-output name=IMAGE_TAG::$(cat VERSION)
+    #######################################################################################
+    #######################################################################################
+    #######################################################################################
+    ### 아래부터 CD
+
+    - name: Get image tag(verion)
+      id: image
+      run: |
+        VERSION=$(echo ${{ github.sha }} | cut -c1-8)
+        echo VERSION=$VERSION
+        echo "::set-output name=version::$VERSION"
+    
+    - name: Build, tag, and push image to Amazon ECR
+      id: image-info
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: ${{ secrets.ECR_REPO_NAME }}
+        IMAGE_TAG: ${{ steps.image.outputs.version }}
+      run: |
+        echo "::set-output name=ecr_repository::$ECR_REPOSITORY"
+        echo "::set-output name=image_tag::$IMAGE_TAG"
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    # - name: Docker image Build
+    #   id: image-info
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY: web
+    #     IMAGE_TAG: ${{ steps.image.outputs.version }}
+    #   run: |
+    #     docker build \
+    #     -f Dockerfile \
+    #     -t ${{ steps.set-var.outputs.ECR_REGISTRY }}/${{ steps.set-var.outputs.ECR_REPOSITORY }}:${{ steps.set-var.outputs.IMAGE_TAG }} .
+
+    # - name: Docker image Push
+    #   id: push-image
+    #   run: |
+    #     docker push ${{ steps.set-var.outputs.ECR_REGISTRY }}/${{ steps.set-var.outputs.ECR_REPOSITORY }}:${{ steps.set-var.outputs.IMAGE_TAG }}
+
+    - name: Setup Kustomize
+      uses: imranismail/setup-kustomize@v1
+
+    - name: Checkout kustomize repository
+      uses: actions/checkout@v2
+      with:
+        repository: "Seong-dong/team_prj_k8s"
+        ref: main
+        token: ${{ secrets.ACTION_TOKEN }}
+        path: team_prj_k8s
+
+    - name: Update Kubernetes resources
+      run: |
+        echo ${{ steps.login-ecr.outputs.registry }}
+        echo ${{ steps.image-info.outputs.ecr_repository }}
+        echo ${{ steps.image-info.outputs.image_tag }}
+        cd team_prj_k8s/overlays/dev/
+        kustomize edit set image ${{ steps.login-ecr.outputs.registry}}/\${{ steps.image-info.outputs.ecr_repository }}=\${{ steps.login-ecr.outputs.registry}}/\${{ steps.image-info.outputs.ecr_repository }}:\${{ steps.image-info.outputs.image_tag }}
+        cat kustomization.yaml
+
+    - name: Commit files
+      run: |
+        cd team_prj_k8s
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "github-actions"
+        git commit -am "Update image tag"
+        git push -u origin main
