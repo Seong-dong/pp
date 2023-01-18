@@ -13,30 +13,56 @@
 <section>
     <div class="container">
         <div class="row justify-content-between">
-            <div class="col-lg-6 text-warning">
-<!--                <h1 class="shadow-none mt-5">Welcome~! Have a good day!</h1>-->
-<!--                <h2>We are 22shop</h2>-->
-<!--                <h3>수정 중 입니다.</h3>-->
+            <div class="col-lg-4 text-light">
             </div>
-            <div class="col-lg-5">
-                    <h2 class="text-light mt-5">Notice - Recent posts</h2>
-<!--                    <h2 class="text-light mt-5">Blog - Recent posts</h2>-->
-                    {% for post in recent_posts %}
-                    <div class="card mt-1">
-                        <div class="card-body">
-                            <h6><a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark">{{ post.title }}</a></h6>
-                            <span class="badge badge-pill badge-light float-right">
-                                {{ post.author.username }}
-                                &nbsp;&nbsp;
-                                {{ post.created_at }}
-                            </span>
+            <div class="col-lg-4 text-light">
+            </div>
+            <div class="col-lg-4">
+                <h2 class="text-light mt-5">Notice - Recent posts</h2>
+                {% for post in recent_posts %}
+                <div class="card mt-1">
+                    <div class="card-body">
+                        <h6><a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark">{{ post.title }}</a></h6>
+                        <span class="badge badge-pill badge-light float-right">
+                            {{ post.author.username }}
+                            &nbsp;&nbsp;
+                            {{ post.created_at }}
+                        </span>
 
-                        </div>
                     </div>
-                    {% endfor %}
-
                 </div>
+                {% endfor %}
+
+            </div>
         </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-lg-4 text-light">
+            </div>
+            <div class="bg-light col-lg-4 text-secondary">
+                <form method="post" action="{% url 'common:login' %}">
+                {% csrf_token %}
+                <div class="mb-3 mt-5">
+                    <label for="username">사용자ID</label>
+                    <input type="text" class="form-control" name="username" id="username">
+                </div>
+                <div class="mb-3">
+                    <label for="password">비밀번호</label>
+                    <input type="password" class="form-control" name="password" id="password">
+                </div>
+                <button type="submit" class="btn btn-primary">로그인</button>
+                </form>
+                <br>
+            </div>
+            <div class="col-lg-4 text-light">
+            </div>
+        </div>
+
+
+
     </div>
 </section>
 <script>
