@@ -12,29 +12,25 @@
 
 <section>
     <div class="container">
+        <h2 class="text-light mt-5">Notice - Recent posts</h2>
         <div class="row justify-content-between">
-            <div class="col-lg-4 text-light">
-            </div>
-            <div class="col-lg-4 text-light">
-            </div>
-            <div class="col-lg-4">
-                <h2 class="text-light mt-5">Notice - Recent posts</h2>
-                {% for post in recent_posts %}
-                <div class="card mt-1">
-                    <div class="card-body">
-                        <h6><a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark">{{ post.title }}</a></h6>
-                        <span class="badge badge-pill badge-light float-right">
+            {% for post in recent_posts %}
+                <div class="col-lg-4 text-light">
+                    <div class="card mt-1">
+                        <div class="card-body">
+                            <h6><a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark">{{ post.title }}</a></h6>
+                            <img width = "300px" src="{{ post.head_image.url }}" alt="My image">
+                            <p>{{ post.content }}</p>
+                            <span class="badge badge-pill badge-light float-right">
                             {{ post.author.username }}
-                            &nbsp;&nbsp;
                             {{ post.created_at }}
-                        </span>
-
+                            </span>
+                        </div>
                     </div>
                 </div>
-                {% endfor %}
-
-            </div>
+            {% endfor %}
         </div>
+        <hr>
         <br>
         <br>
         <br>
@@ -63,9 +59,6 @@
             </div>
         </div>
         {% endif %}
-
-
-
     </div>
 </section>
 <script>
